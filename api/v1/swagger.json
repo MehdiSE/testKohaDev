@@ -1,0 +1,255 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Koha REST API",
+    "version": "1",
+    "license": {
+      "name": "GPL v3",
+      "url": "http://www.gnu.org/licenses/gpl.txt"
+    },
+    "contact": {
+      "name": "Koha Team",
+      "url": "http://koha-community.org/"
+    }
+  },
+  "basePath": "/api/v1",
+  "paths": {
+    "/patrons": {
+      "get": {
+        "operationId": "listPatrons",
+        "tags": ["patrons"],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of patrons",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/patron"
+              }
+            }
+          },
+          "403": {
+            "description": "Access forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
+    "/patrons/{borrowernumber}": {
+      "get": {
+        "operationId": "getPatron",
+        "tags": ["patrons"],
+        "parameters": [
+          {
+            "$ref": "#/parameters/borrowernumberPathParam"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A patron",
+            "schema": {
+              "$ref": "#/definitions/patron"
+            }
+          },
+          "403": {
+            "description": "Access forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "404": {
+            "description": "Patron not found",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
+    "/holds": {
+      "get": {
+        "operationId": "listHolds",
+        "tags": ["borrowers", "holds"],
+        "parameters": [
+          {
+            "name": "borrowernumber",
+            "in": "query",
+            "description": "Internal borrower identifier",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "A list of holds",
+            "schema": { "$ref": "#/definitions/holds" }
+          },
+          "404": {
+            "description": "Borrower not found",
+            "schema": { "$ref": "#/definitions/error" }
+          }
+        }
+      },
+      "post": {
+        "operationId": "addHold",
+        "tags": ["borrowers", "holds"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "A JSON object containing informations about the new hold",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "borrowernumber": {
+                  "description": "Borrower internal identifier",
+                  "type": "integer"
+                },
+                "biblionumber": {
+                  "description": "Biblio internal identifier",
+                  "type": "integer"
+                },
+                "itemnumber": {
+                  "description": "Item internal identifier",
+                  "type": "integer"
+                },
+                "branchcode": {
+                  "description": "Pickup location",
+                  "type": "string"
+                },
+                "expirationdate": {
+                  "description": "Hold end date",
+                  "type": "string",
+                  "format": "date"
+                }
+              }
+            }
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "201": {
+            "description": "Created hold",
+            "schema": { "$ref": "#/definitions/hold" }
+          },
+          "400": {
+            "description": "Missing or wrong parameters",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "403": {
+            "description": "Hold not allowed",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "404": {
+            "description": "Borrower not found",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": { "$ref": "#/definitions/error" }
+          }
+        }
+      }
+    },
+    "/holds/{reserve_id}": {
+      "put": {
+        "operationId": "editHold",
+        "tags": ["holds"],
+        "parameters": [
+          { "$ref": "#/parameters/holdIdPathParam" },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "A JSON object containing fields to modify",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "priority": {
+                  "description": "Position in waiting queue",
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "branchcode": {
+                  "description": "Pickup location",
+                  "type": "string"
+                },
+                "suspend_until": {
+                  "description": "Suspend until",
+                  "type": "string",
+                  "format": "date"
+                }
+              }
+            }
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Updated hold",
+            "schema": { "$ref": "#/definitions/hold" }
+          },
+          "400": {
+            "description": "Missing or wrong parameters",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "404": {
+            "description": "Hold not found",
+            "schema": { "$ref": "#/definitions/error" }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteHold",
+        "tags": ["holds"],
+        "parameters": [
+          { "$ref": "#/parameters/holdIdPathParam" }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Successful deletion",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "404": {
+            "description": "Hold not found",
+            "schema": { "$ref": "#/definitions/error" }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "$ref": "./definitions/index.json"
+  },
+  "parameters": {
+    "borrowernumberPathParam": {
+      "name": "borrowernumber",
+      "in": "path",
+      "description": "Internal patron identifier",
+      "required": true,
+      "type": "integer"
+    },
+    "holdIdPathParam": {
+      "name": "reserve_id",
+      "in": "path",
+      "description": "Internal hold identifier",
+      "required": true,
+      "type": "integer"
+    }
+  }
+}

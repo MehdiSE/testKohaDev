@@ -1,0 +1,23 @@
+Tools:
+    Batch item modification:
+        -
+            - Process up to
+            - pref: MaxItemsForBatch
+              class: integer
+            - items in a single modification or deletion batch.
+    Patron cards:
+        -
+            - Limit the number of creator images stored in the database to
+            - pref: ImageLimit
+              class: Integer
+            - images.
+    News:
+        -
+            - "Show the author for news items:"
+            - pref: NewsAuthorDisplay
+              choices:
+                  none: "Not at all"
+                  opac: "OPAC only"
+                  staff: "Staff client only"
+                  both: "Both OPAC and staff client"
+            -
